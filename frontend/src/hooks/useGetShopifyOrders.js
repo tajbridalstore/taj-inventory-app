@@ -48,7 +48,7 @@ const useGetShopifyOrders = () => {
         const response = await axios.get(
           `${BASE_URL}/api/v1/order/get-shopify-orders`
         );
-
+    console.log(response)
         if (
           response.status >= 200 &&
           response.status < 300 &&

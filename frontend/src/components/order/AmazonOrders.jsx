@@ -18,6 +18,7 @@ import useGetAmazonOrders from "@/hooks/useGetAmazonOrders";
 const AmazonOrders = () => {
   useGetAmazonOrders();
   const {amazonOrders,loading,error} = useSelector(state => state.order)
+  console.log(amazonOrders)
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
    const itemsPerPage = 10;

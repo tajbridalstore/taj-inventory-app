@@ -50,7 +50,7 @@ const useGetAmazonOrders = () => {
           // Fetch from server if no cache
           const response = await axios.get(`${BASE_URL}/api/v1/order/get-amazon-orders`);
   
-
+console.log("first",response)
           if (response.data.success) {
             const sortedOrders = response.data.data.sort(
               (a, b) => new Date(b.PurchaseDate) - new Date(a.PurchaseDate)

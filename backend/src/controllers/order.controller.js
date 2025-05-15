@@ -363,7 +363,7 @@ const getAllShopifyOrders = async (req, res) => {
   const cache = new NodeCache({ stdTTL: 3600 });
   try {
     const shopifyOrders = "shopify_orders";
-
+console.log("first")
     // 🔍 1. Check cache
     const cachedOrders = cache.get(shopifyOrders);
 
@@ -465,10 +465,10 @@ const getShopifyOrderItem = async (req, res) => {
 
 
 const getAppOrders = async (req, res) => {
-  console.log("call");
+
   try {
       const orders = await Order.find().populate('orderItems.product'); // Populate product details
-      console.log(orders);
+ 
       if (!orders || orders.length === 0) { // Check for null or empty array
           return res.status(404).json({
               message: "Orders not found",

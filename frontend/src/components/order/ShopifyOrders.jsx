@@ -10,11 +10,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import useGetShopifyOrders from "@/hooks/useGetShopifyOrders";
 
 const ShopifyOrders = () => {
+  useGetShopifyOrders();
   const navigate = useNavigate();
   
- const {shopifyLoading,shopifyError, shopifyTotalOrders} = useSelector(state => state.order)
+ const {shopifyLoading,shopifyError, shopifyTotalOrders} = useSelector(state => state.order);
+ console.log(shopifyTotalOrders)
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
