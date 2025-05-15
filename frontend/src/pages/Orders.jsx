@@ -21,11 +21,11 @@ const Orders = () => {
       </div>
       <div className='border-b-2 border-gray-100 pb-2'>
         <h2>Amazon Orders</h2>
-        {/* <AmazonOrders /> */}
+        <AmazonOrders />
       </div>
       <div className='border-b-2 border-gray-100 pb-2'>
         <h2>Shopify Orders</h2>
-        {/* <ShopifyOrders /> */}
+        <ShopifyOrders />
       </div>
     </div>
   )
