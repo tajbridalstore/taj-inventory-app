@@ -21,6 +21,7 @@ import OrderDetails from './pages/OrderDetails'
 import DispatchOrder from './pages/DispatchOrder'
 import DeliveredOrders from './pages/DeliveredOrders'
 import CancelOrders from './pages/CancelOrders'
+import ReplaceOrders from './pages/ReplaceOrders'
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
         <Route path='dispatch-orders' element={<DispatchOrder />} />
         <Route path='delivered-orders' element={<DeliveredOrders />} />
         <Route path='cancel-orders' element={<CancelOrders />} />
+        <Route path='replace-orders' element={<ReplaceOrders />} />
 
       </Route>
      </Routes>

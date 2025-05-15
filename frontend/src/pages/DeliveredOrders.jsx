@@ -6,6 +6,7 @@ import { toast } from 'sonner'; // For notifications
 import axios from 'axios'; // For making the API call
 import { BASE_URL } from '@/services/api';
 import {  fetchReplacedItems, removeDeliveredItem } from '@/store/orderSlice';
+import { useNavigate } from 'react-router';
 
 const DeliveredOrders = () => {
   const dispatch = useDispatch();
@@ -53,9 +54,8 @@ const DeliveredOrders = () => {
       });
   };
 
-  // Function to call the replacement order API
   const handleConfirmReplacement = async () => {
-    setIsSubmitting(true); // Disable the button
+    setIsSubmitting(true); 
     const itemsToReplace = getSelectedReplacementItems();
 
     if (itemsToReplace.length === 0) {
@@ -64,17 +64,13 @@ const DeliveredOrders = () => {
       return;
     }
 
-    // Get the orderId from the first item.  All items should be from the same order.
+   
     const originalOrderId = deliveredProducts[0].orderId;
 
-    // Prepare the data to send to the API
     const replacementData = {
       originalOrderId,
       replacedItems: itemsToReplace,
-      //  You'll need to get the rest of the order data.  For this example, I'm assuming you can get it
-      //  from the Redux store or from the deliveredItems.  You might need to adjust this
-      //  based on your actual data structure.
-      orderFrom: deliveredItems[0]?.orderFrom, // Example: Get from the first delivered item
+      orderFrom: deliveredItems[0]?.orderFrom, 
       orderType: deliveredItems[0]?.orderType,
       orderDate: deliveredItems[0]?.orderDate,
       advanceDiposite: deliveredItems[0]?.advanceDiposite,
@@ -94,7 +90,6 @@ const DeliveredOrders = () => {
       dispatch(fetchReplacedItems(response))
      dispatch(removeDeliveredItem(originalOrderId)); 
       setShowPopover(false); 
-  
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create replacement order'); 
       console.error('Error replacing order:', error);

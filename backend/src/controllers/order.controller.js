@@ -1011,30 +1011,26 @@ const cancelAppOrderWithStatus = async (req, res) => {
 };
 
 ////////////////////////////////////
+
 const createReplacementOrder = async (req, res) => {
   try {
     const {
-      originalOrderId, // The ID of the order being replaced (now orderId)
-      replacedItems, // Array of items being replaced, with new SKUs and originalOrderItemIds
+      originalOrderId,
+      replacedItems,
     } = req.body;
-    console.log(req.body);
 
-    // Validate required fields
     if (!originalOrderId || !replacedItems || replacedItems.length === 0) {
-      return res
-        .status(400)
-        .json({
-          message:
-            'Missing required fields (originalOrderId, replacedItems)',
-        });
+      return res.status(400).json({
+        message:
+          'Missing required fields (originalOrderId, replacedItems)',
+      });
     }
 
-    // 1. Fetch the original order with populated orderItems and variants
     let originalOrder;
     try {
       originalOrder = await Order.findOne({ orderId: originalOrderId }).populate({
         path: 'orderItems.product',
-        populate: { path: 'variants' }, // Populate variants as well
+        populate: { path: 'variants' },
       });
     } catch (error) {
       return res.status(500).json({
@@ -1049,7 +1045,6 @@ const createReplacementOrder = async (req, res) => {
       return res.status(404).json({ message: 'Original order not found' });
     }
 
-    // 2. Restock the items from the original order and prepare new order items
     const restockUpdates = [];
     const newOrderItems = [];
     let newOrderAmount = 0;
@@ -1067,23 +1062,20 @@ const createReplacementOrder = async (req, res) => {
       note: originalOrder.note,
     };
 
+    const processedOriginalItems = new Set();
+
     for (const originalItem of originalOrder.orderItems) {
       const replacedItem = replacedItems.find(
         (ri) => ri.originalOrderItemId === originalItem._id.toString()
       );
 
       if (replacedItem) {
-        // Item is being replaced
-        // Find the specific variant of the original product based on some identifier
-        // Since your orderItem doesn't store the SKU, we might need to assume
-        // there's only one variant or you have another way to identify the original variant.
-        // For now, let's assume the first variant is the correct one.
         if (!originalItem.product || !originalItem.product.variants || originalItem.product.variants.length === 0) {
           return res.status(400).json({
             message: `No variants found for product ${originalItem.product?._id} in original order item ${originalItem._id}`,
           });
         }
-        const originalVariant = originalItem.product.variants[0]; // Assuming the first variant is the one ordered
+        const originalVariant = originalItem.product.variants[0];
 
         if (!originalVariant) {
           return res.status(400).json({
@@ -1091,7 +1083,6 @@ const createReplacementOrder = async (req, res) => {
           });
         }
 
-        // Restock original item
         restockUpdates.push({
           updateOne: {
             filter: {
@@ -1102,7 +1093,6 @@ const createReplacementOrder = async (req, res) => {
           },
         });
 
-        // Restock related SKUs for the original item
         if (
           originalVariant.relatedSku &&
           originalVariant.relatedSku.length > 0
@@ -1112,10 +1102,10 @@ const createReplacementOrder = async (req, res) => {
               'variants.sku': related.sku,
             });
             if (relatedProduct) {
-              const relatedVariant = relatedProduct.variants.find(
+              const relatedVariantData = relatedProduct.variants.find(
                 (v) => v.sku === related.sku
               );
-              if (relatedVariant) {
+              if (relatedVariantData) {
                 const quantityToRestock =
                   related.quantity * originalItem.quantity;
                 restockUpdates.push({
@@ -1134,7 +1124,6 @@ const createReplacementOrder = async (req, res) => {
           }
         }
 
-        // 3.  Find the new product and variant
         const newProduct = await Product.findOne({
           'variants.sku': replacedItem.newSku,
         });
@@ -1158,7 +1147,6 @@ const createReplacementOrder = async (req, res) => {
           });
         }
 
-        // Deduct quantity for the new order
         restockUpdates.push({
           updateOne: {
             filter: {
@@ -1169,28 +1157,27 @@ const createReplacementOrder = async (req, res) => {
           },
         });
 
-        // Deduct quantity for related SKUs for the new order
         if (newVariant.relatedSku && newVariant.relatedSku.length > 0) {
           for (const related of newVariant.relatedSku) {
-            const relatedProduct = await Product.findOne({
+            const relatedProductNew = await Product.findOne({
               'variants.sku': related.sku,
             });
-            if (relatedProduct) {
-              const relatedVariant = relatedProduct.variants.find(
+            if (relatedProductNew) {
+              const relatedVariantDataNew = relatedProductNew.variants.find(
                 (v) => v.sku === related.sku
               );
-              if (relatedVariant) {
+              if (relatedVariantDataNew) {
                 const quantityToReduce =
                   related.quantity * originalItem.quantity;
-                if (relatedVariant.quantity < quantityToReduce) {
+                if (relatedVariantDataNew.quantity < quantityToReduce) {
                   console.warn(
-                    `Insufficient quantity for related SKU: ${related.sku} in product ${relatedProduct._id}. Available: ${relatedVariant.quantity}, Required: ${quantityToReduce}`
+                    `Insufficient quantity for related SKU: ${related.sku} in product ${relatedProductNew._id}. Available: ${relatedVariantDataNew.quantity}, Required: ${quantityToReduce}`
                   );
                 } else {
                   restockUpdates.push({
                     updateOne: {
                       filter: {
-                        _id: relatedProduct._id,
+                        _id: relatedProductNew._id,
                         'variants.sku': related.sku,
                       },
                       update: {
@@ -1204,7 +1191,6 @@ const createReplacementOrder = async (req, res) => {
           }
         }
 
-        // Add to new order items
         newOrderItems.push({
           product: newProduct._id,
           quantity: originalItem.quantity,
@@ -1213,15 +1199,14 @@ const createReplacementOrder = async (req, res) => {
           variantDetails: { sku: newVariant.sku },
         });
         newOrderAmount += newVariant.price * originalItem.quantity;
+        processedOriginalItems.add(originalItem._id);
       } else {
-        // Item is not being replaced, add original item to new order
-        // Again, we need to identify the correct variant. Assuming the first one.
         if (!originalItem.product || !originalItem.product.variants || originalItem.product.variants.length === 0) {
           return res.status(400).json({
             message: `No variants found for product ${originalItem.product?._id} in original order item ${originalItem._id}`,
           });
         }
-        const originalVariant = originalItem.product.variants[0]; // Assuming the first variant is the one ordered
+        const originalVariant = originalItem.product.variants[0];
 
         if (!originalVariant) {
           return res.status(400).json({
@@ -1232,12 +1217,11 @@ const createReplacementOrder = async (req, res) => {
           product: originalItem.product._id,
           quantity: originalItem.quantity,
           status: 'pending',
-          variant: originalVariant._id, // Assuming you want to keep the same variant
+          variant: originalVariant._id,
           variantDetails: { sku: originalVariant.sku },
         });
         newOrderAmount += originalVariant.price * originalItem.quantity;
 
-        // Deduct quantity for the new order (since it's a direct copy)
         restockUpdates.push({
           updateOne: {
             filter: {
@@ -1248,22 +1232,21 @@ const createReplacementOrder = async (req, res) => {
           },
         });
 
-        // Deduct quantity for related SKUs for the new order
         if (originalVariant.relatedSku && originalVariant.relatedSku.length > 0) {
           for (const related of originalVariant.relatedSku) {
             const relatedProduct = await Product.findOne({
               'variants.sku': related.sku,
             });
             if (relatedProduct) {
-              const relatedVariant = relatedProduct.variants.find(
+              const relatedVariantData = relatedProduct.variants.find(
                 (v) => v.sku === related.sku
               );
-              if (relatedVariant) {
+              if (relatedVariantData) {
                 const quantityToReduce =
                   related.quantity * originalItem.quantity;
-                if (relatedVariant.quantity < quantityToReduce) {
+                if (relatedVariantData.quantity < quantityToReduce) {
                   console.warn(
-                    `Insufficient quantity for related SKU: ${related.sku} in product ${relatedProduct._id}. Available: ${relatedVariant.quantity}, Required: ${quantityToReduce}`
+                    `Insufficient quantity for related SKU: ${related.sku} in product ${relatedProduct._id}. Available: ${relatedVariantData.quantity}, Required: ${quantityToReduce}`
                   );
                 } else {
                   restockUpdates.push({
@@ -1285,7 +1268,6 @@ const createReplacementOrder = async (req, res) => {
       }
     }
 
-    // 4. Calculate shipping, COD, and total for the new order
     let shippingCharges = 100;
     let codAmount;
     let totalAmount;
@@ -1333,32 +1315,30 @@ const createReplacementOrder = async (req, res) => {
       }
     }
 
-    // 5. Create the new order
     const newOrder = new Order({
       ...orderDataForNewOrder,
-      orderId: `REPLACEMENT-${originalOrder.orderId}`, // Generate a new order ID
+      orderId: `REPLACEMENT-${originalOrder.orderId}`,
       orderItems: newOrderItems,
       shippingCharges,
       codAmount,
       amount: newOrderAmount,
       totalAmount,
-      replacedOrder: originalOrder._id, // Store the ID of the original order
+      replacedOrder: originalOrder._id,
     });
 
-    // 6. Execute all updates and save the new order atomically
     const [savedNewOrder] = await Promise.all([
       newOrder.save(),
       Product.bulkWrite(restockUpdates),
       Order.updateOne(
         { _id: originalOrder._id },
         { status: 'replaced' }
-      ), // Update original order status
+      ),
     ]);
 
     const populatedSavedOrder = await Order.findById(
       savedNewOrder._id
     ).populate('orderItems.product');
-    // 7. Return the new order details
+
     res.status(201).json({
       message: 'Replacement order created successfully',
       order: populatedSavedOrder,
@@ -1372,9 +1352,6 @@ const createReplacementOrder = async (req, res) => {
     });
   }
 };
-
-
-
 
 
 module.exports = {

@@ -57,5 +57,10 @@ export const MenuItems = [
       name:"Cancel Orders",
       path:"/cancel-orders",
       icon:Package 
+   },
+     {
+      name:"Replace Orders",
+      path:"/replace-orders",
+      icon:Package 
    }
 ]

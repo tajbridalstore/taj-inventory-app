@@ -12,19 +12,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { BASE_URL } from "@/services/api";
-import { useNavigate } from "react-router";
-import { fetchCancelItems, fetchIntransitItems, removeManifestItem } from "@/store/orderSlice";
+import {
+  fetchCancelItems,
+  fetchIntransitItems,
+  removeManifestItem,
+} from "@/store/orderSlice";
 import useGetOrders from "@/hooks/useGetOrders";
 
 const MenifestOrders = () => {
   useGetOrders();
   const { menifestItems } = useSelector((state) => state.order);
-  const [localManifestItems, setLocalManifestItems] = useState(menifestItems); // New local state
+  const [localManifestItems, setLocalManifestItems] = useState(menifestItems);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isDispatching, setIsDispatching] = useState(false); // Spinner state
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [isDispatchDialogOpen, setIsDispatchDialogOpen] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
   const { register, handleSubmit, reset, watch } = useForm({
@@ -36,10 +39,9 @@ const MenifestOrders = () => {
       shipper: "delhivery",
     },
   });
-  console.log("menifestItems111111", menifestItems);
 
   useEffect(() => {
-    setLocalManifestItems(menifestItems); // Keep local state in sync with Redux state
+    setLocalManifestItems(menifestItems);
   }, [menifestItems]);
 
   useEffect(() => {
@@ -59,18 +61,19 @@ const MenifestOrders = () => {
     setIsDispatchDialogOpen(false);
     reset();
     setImagePreviews([]);
+    setIsDispatching(false);
   };
-
-  const dispatchImages = watch("dispatchImages");
 
   const onSubmit = async (data) => {
     if (!selectedItem) {
       console.warn("No selected item to dispatch");
       return;
     }
+
     const orderId = selectedOrder.orderId;
 
     try {
+      setIsDispatching(true);
       const formData = new FormData();
       formData.append("orderId", orderId);
       formData.append("trackingNumber", data.trackingNumber);
@@ -98,44 +101,31 @@ const MenifestOrders = () => {
 
       if (response.status === 200) {
         dispatch(fetchIntransitItems(response?.data?.data?.order));
+        dispatch(removeManifestItem(selectedItem._id));
         handleCloseDispatchDialog();
-        navigate(`/dispatch-orders`);
       } else {
         console.error("Dispatch failed with status:", response.status);
       }
     } catch (error) {
       console.error("Error dispatching order:", error);
+    } finally {
+      setIsDispatching(false);
     }
   };
 
   const handleCancelOrder = async (orderId, item) => {
-    console.log("handleCancelOrder", item);
-    const cancelOrderItemIds = [item._id]; // Send an array with the specific item's _id
+    const cancelOrderItemIds = [item._id];
     try {
       const response = await axios.post(
         `${BASE_URL}/api/v1/order/cancel-order-with-status`,
         { orderId, orderItemIds: cancelOrderItemIds }
       );
-      console.log("Order item cancelled:", response.data);
       alert(response.data.message || "Order item cancelled successfully.");
-dispatch(fetchCancelItems(response))
-      // Optimistically update local state
-      // setLocalManifestItems((prevItems) =>
-      //   prevItems.filter(
-      //     (itemWrapper) =>
-      //       itemWrapper?.data?.order?.orderItems?.findIndex(
-      //         (orderItem) => orderItem._id === item._id
-      //       ) === -1
-      //   )
-      // );
-
-      // Dispatch action to update Redux store
+      dispatch(fetchCancelItems(response));
       dispatch(removeManifestItem(item._id));
-
     } catch (error) {
       console.error("Failed to cancel order item:", error);
       alert(error.response?.data?.message || "Failed to cancel order item.");
-      // Optionally, revert local state update on error
     }
   };
 
@@ -155,19 +145,18 @@ dispatch(fetchCancelItems(response))
             <ul key={idx}>
               <li className="border p-4 mb-4 rounded space-y-3 text-xl">
                 <h2>
-                  <strong>Order ID:</strong>
-                  {order.orderId}
+                  <strong>Order ID:</strong> {order.orderId}
                 </h2>
                 <p>
-                  <strong> Order Date:</strong>{" "}
+                  <strong>Order Date:</strong>{" "}
                   {new Date(order.orderDate).toLocaleDateString()}
                 </p>
                 <p>
                   <strong>Customer Name:</strong> {order.name}
                 </p>
                 <p>
-                  <strong> Shipping Address: </strong>
-                  {order.address}, {order.city},{order.pinCode}, {order.country}
+                  <strong>Shipping Address:</strong> {order.address},{" "}
+                  {order.city}, {order.pinCode}, {order.country}
                 </p>
                 <p>
                   <strong>Mobile:</strong> {order?.mobile?.[0]?.number}
@@ -187,45 +176,6 @@ dispatch(fetchCancelItems(response))
                         <h4>Product: {item.product?.productTitle}</h4>
                         <p>Quantity: {item.quantity}</p>
 
-                        {item.product?.variants?.length > 0 ? (
-                          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-                            {item.product.variants.map((variant, i) => (
-                              <li
-                                key={i}
-                                className="border p-1 rounded text-xl space-y-3 mt-2"
-                              >
-                                {variant?.main_product_image_locator?.[0]
-                                  ?.media_location && (
-                                    <img
-                                      src={
-                                        variant.main_product_image_locator[0]
-                                          .media_location
-                                      }
-                                      alt={`Variant ${i}`}
-                                      className="w-full h-80 object-cover rounded-md mb-1"
-                                    />
-                                  )}
-                                <p>
-                                  <strong>SKU:</strong> {variant.sku}
-                                </p>
-                                {variant.size?.[0]?.value && (
-                                  <p>
-                                    <strong>Size:</strong>{" "}
-                                    {variant.size[0].value}
-                                  </p>
-                                )}
-                                {variant.price && (
-                                  <p>
-                                    <strong>Price:</strong> ₹{variant.price}
-                                  </p>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p>No variants for this product.</p>
-                        )}
-
                         <div className="text-right mt-2 space-x-2">
                           <Button
                             onClick={() =>
@@ -234,13 +184,12 @@ dispatch(fetchCancelItems(response))
                           >
                             Add to Dispatch
                           </Button>
-
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() =>
                               handleCancelOrder(order.orderId, item)
-                            } // Passing individual item
+                            }
                           >
                             Cancel Order
                           </Button>
@@ -249,9 +198,7 @@ dispatch(fetchCancelItems(response))
                     ))}
                   </ul>
                 ) : (
-                  <p>
-                    No items have been added to the manifest for this order yet.
-                  </p>
+                  <p>No items added to manifest for this order.</p>
                 )}
               </li>
             </ul>
@@ -276,16 +223,13 @@ dispatch(fetchCancelItems(response))
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2">
-              <Label className="text-gray-700">Tracking Number</Label>
-              <Input
-                {...register("trackingNumber")}
-                placeholder="Enter tracking number"
-              />
+            <div>
+              <Label>Tracking Number</Label>
+              <Input {...register("trackingNumber")} placeholder="Enter tracking number" />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-700">Courier Charges</Label>
+            <div>
+              <Label>Courier Charges</Label>
               <Input
                 {...register("courierCharges")}
                 type="number"
@@ -293,8 +237,8 @@ dispatch(fetchCancelItems(response))
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-700">Send details to customer</Label>
+            <div>
+              <Label>Send details to customer</Label>
               <select
                 {...register("detailsSendToCustomer")}
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
@@ -304,8 +248,8 @@ dispatch(fetchCancelItems(response))
               </select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-700">Shipper</Label>
+            <div>
+              <Label>Shipper</Label>
               <select
                 {...register("shipper")}
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
@@ -315,8 +259,8 @@ dispatch(fetchCancelItems(response))
               </select>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-700">Dispatch Images</Label>
+            <div>
+              <Label>Dispatch Images</Label>
               <Input
                 type="file"
                 multiple
@@ -333,25 +277,47 @@ dispatch(fetchCancelItems(response))
             </div>
 
             {imagePreviews.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-2 gap-4">
                 {imagePreviews.map((src, i) => (
-                  <div
+                  <img
                     key={i}
-                    className="relative border rounded overflow-hidden"
-                  >
-                    <img
-                      src={src}
-                      alt={`Preview ${i}`}
-                      className="object-cover w-full h-32"
-                    />
-                  </div>
+                    src={src}
+                    className="w-full h-48 object-cover rounded"
+                    alt={`Preview ${i}`}
+                  />
                 ))}
               </div>
             )}
 
-            <div className="text-right pt-4">
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Submit Dispatch
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isDispatching}>
+                {isDispatching ? (
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    Dispatching...
+                  </div>
+                ) : (
+                  "Dispatch Now"
+                )}
               </Button>
             </div>
           </form>

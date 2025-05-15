@@ -118,17 +118,10 @@ removeManifestItem(state, action) {
         state.deliveredItems = [...state.deliveredItems, payload];
       }
     },
-    removeDeliveredItem(state, action) {
+removeDeliveredItem(state, action) {
   const orderIdToRemove = action.payload;
-  state.deliveredItems = state.deliveredItems.filter(item => {
-   
-    if(item.orderId){
-        return item.orderId !== orderIdToRemove;
-    }
-    else{
-        return true; //keep the item if it does not have orderId
-    }
-
+  state.deliveredItems = state.deliveredItems.filter(itemWrapper => {
+    return itemWrapper?.updatedOrder?.orderId !== orderIdToRemove;
   });
 },
     fetchCancelItems(state, action) {

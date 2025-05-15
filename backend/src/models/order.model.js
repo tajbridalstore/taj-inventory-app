@@ -36,7 +36,7 @@ const orderSchema = new mongoose.Schema({
     quantity: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["pending", "manifest", "cancelled", "intransit", "delivered", "returned", "replacement"],
+      enum: ["pending", "manifest", "cancelled", "intransit", "delivered", "returned", "replacement","replaced"],
       default: "pending"
     },
     amount:{type:Number,default:0},
@@ -74,7 +74,7 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "manifest", "cancelled", "intransit", "delivered", "returned", "replacement"],
+    enum: ["pending", "manifest", "cancelled", "intransit", "delivered", "returned", "replacement","replaced"],
     default: "pending"
   },
   dispatchedDate: { type: String, default: "" },

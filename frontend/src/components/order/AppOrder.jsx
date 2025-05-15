@@ -1,7 +1,7 @@
 import useGetOrders from "@/hooks/useGetOrders";
 import React from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router"; // Correct import for useNavigate
+import { useNavigate } from "react-router"; 
 import {
   Table,
   TableHeader,
@@ -9,7 +9,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table"; // Assuming your Shadcn UI table components are here
+} from "@/components/ui/table"; 
 import { Button } from "../ui/button";
 
 const AppOrder = () => {
@@ -17,29 +17,18 @@ const AppOrder = () => {
   useGetOrders();
   const {
     totalOrders,
-    pendingOrders,
     loading,
     error,
-    shopifyError,
-    intransitItems,
-    cancelOrders,
-    menifestItems,
-    deliveredItems,
+
+
   } = useSelector((state) => state.order);
   console.log("totalOrders", totalOrders);
-  console.log("pendingOrders", pendingOrders);
-  console.log("intransitItems", intransitItems);
-  console.log("cancelOrders", cancelOrders);
-  console.log("menifestItems", menifestItems);
-  console.log("deliveredItems", deliveredItems);
+
 
   if (loading) {
     return <p>Loading orders...</p>;
   }
 
-  if (error || shopifyError) {
-    return <p>Error loading orders: {error || shopifyError}</p>;
-  }
 
   return (
     <div>

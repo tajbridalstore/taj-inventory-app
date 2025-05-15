@@ -12,7 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { BASE_URL } from "@/services/api";
-import { fetchCancelItems, fetchDeliveredItems, fetchIntransitItems, removeIntransitItem } from "@/store/orderSlice";
+import {
+  fetchCancelItems,
+  fetchDeliveredItems,
+  fetchIntransitItems,
+  removeIntransitItem,
+} from "@/store/orderSlice";
 import { useNavigate } from "react-router";
 import {
   Popover,
@@ -24,12 +29,11 @@ import { Input } from "@/components/ui/input";
 const DispatchOrder = () => {
   useGetOrders();
   const { intransitItems } = useSelector((state) => state.order);
-  console.log("intransitItems", intransitItems);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [newCourierCharges, setNewCourierCharges] = useState({});
+  const [loadingDelivery, setLoadingDelivery] = useState({});
 
-  // Group orders by orderId and filter items with status "intransit"
   const groupedOrders = {};
 
   intransitItems.forEach((order) => {
@@ -40,13 +44,12 @@ const DispatchOrder = () => {
 
     if (orderItems.length > 0) {
       groupedOrders[orderId] = {
-        _id: order._id, 
+        _id: order._id,
         orderId,
-        dispatchImages: order.dispatchImages || [], 
+        dispatchImages: order.dispatchImages || [],
         items: orderItems.map((item) => ({
           orderItemId: item._id,
           parentTitle: item.product?.productTitle || "N/A",
-         
           variantSKU: item.product?.variants?.[0]?.sku || "N/A",
           quantity: item.quantity || 0,
           status: item.status,
@@ -65,6 +68,7 @@ const DispatchOrder = () => {
 
   const markAsDeliveredWithCharge = async (orderId, orderItemId) => {
     const courierCharge = newCourierCharges[orderId] || 0;
+    setLoadingDelivery((prev) => ({ ...prev, [orderItemId]: true }));
     try {
       const response = await axios.put(
         `${BASE_URL}/api/v1/order/app-order-update-delivered`,
@@ -75,38 +79,35 @@ const DispatchOrder = () => {
           courierCharges: parseFloat(courierCharge),
         }
       );
-      console.log("Marked as delivered with charge:", response.data);
       dispatch(fetchDeliveredItems(response.data));
       navigate(`/delivered-orders`);
     } catch (error) {
       console.error("Failed to mark as delivered with charge:", error);
+    } finally {
+      setLoadingDelivery((prev) => ({ ...prev, [orderItemId]: false }));
     }
   };
 
   const handleCancelOrder = async (orderId, item) => {
-    const cancelOrderItemIds = [item.orderItemId]; 
+    const cancelOrderItemIds = [item.orderItemId];
     try {
       const response = await axios.post(
         `${BASE_URL}/api/v1/order/cancel-order-with-status`,
         { orderId, orderItemIds: cancelOrderItemIds }
       );
-      console.log("Order item cancelled:", response.data);
       alert(response.data.message || "Order item cancelled successfully.");
-      dispatch(fetchCancelItems(response))
-       dispatch(removeIntransitItem(item._id));
+      dispatch(fetchCancelItems(response));
+      dispatch(removeIntransitItem(item._id));
     } catch (error) {
       console.error("Failed to cancel order item:", error);
       alert(error.response?.data?.message || "Failed to cancel order item.");
     }
   };
 
-
-
   return (
     <div className="p-4">
       <h1 className="text-xl font-semibold mb-4">
-        Dispatch Orders - In Transit 
-        {console.log("first")}
+        Dispatch Orders - In Transit
       </h1>
 
       {Object.values(groupedOrders).map((order) => (
@@ -118,7 +119,6 @@ const DispatchOrder = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Dispatch Image</TableHead>
-              
                 <TableHead>Product Title</TableHead>
                 <TableHead>Variant SKU</TableHead>
                 <TableHead>Quantity</TableHead>
@@ -130,7 +130,7 @@ const DispatchOrder = () => {
               {order.items.map((item, idx) => (
                 <TableRow key={idx}>
                   <TableCell>
-                    {order.dispatchImages[0] ? ( 
+                    {order.dispatchImages[0] ? (
                       <img
                         src={order.dispatchImages[0]}
                         alt="Dispatch"
@@ -168,7 +168,8 @@ const DispatchOrder = () => {
                           />
                           <Button
                             size="sm"
-                            className="w-full"
+                            className="w-full flex items-center justify-center gap-2"
+                            disabled={loadingDelivery[item.orderItemId]}
                             onClick={() =>
                               markAsDeliveredWithCharge(
                                 order.orderId,
@@ -176,7 +177,14 @@ const DispatchOrder = () => {
                               )
                             }
                           >
-                            Mark as Delivered
+                            {loadingDelivery[item.orderItemId] ? (
+                              <>
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              "Mark as Delivered"
+                            )}
                           </Button>
                         </div>
                       </PopoverContent>
@@ -185,11 +193,10 @@ const DispatchOrder = () => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleCancelOrder(order.orderId, item)} // Passing individual item
+                      onClick={() => handleCancelOrder(order.orderId, item)}
                     >
                       Cancel Order
                     </Button>
-                   
                   </TableCell>
                 </TableRow>
               ))}
