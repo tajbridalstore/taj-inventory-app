@@ -1,103 +1,152 @@
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router";
-import { useSelector } from "react-redux";
 import useGetAmazonOrders from "@/hooks/useGetAmazonOrders";
-
-
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 
 const AmazonOrders = () => {
   useGetAmazonOrders();
-  const {amazonOrders,loading,error} = useSelector(state => state.order)
-  console.log(amazonOrders)
+  const { amazonOrders, loading, error } = useSelector(state => state.order);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-   const itemsPerPage = 10;
-  
+  const itemsPerPage = 10;
 
+  if (!amazonOrders) return <p className="text-center mt-8 text-gray-500">No orders found.</p>;
 
-  // Pagination Logic
-  const totalPages = Math.ceil(amazonOrders?.length / itemsPerPage);
-  const paginatedOrders = amazonOrders?.slice(
+  const totalPages = Math.ceil(amazonOrders.length / itemsPerPage);
+  const paginatedOrders = amazonOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
 
-  const handlePrev = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleNext = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
+  const handlePrev = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  const handleNext = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
 
   return (
-    <div className="w-full h-full p-4">
-      {loading && <p>Loading orders...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Amazon Orders</h2>
 
-      {!loading && !error && (
+      {loading && (
+        <div className="flex justify-center py-10">
+          <svg
+            className="animate-spin h-8 w-8 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            />
+          </svg>
+        </div>
+      )}
+
+      {error && !loading && (
+        <p className="text-center text-red-600 font-semibold">{error}</p>
+      )}
+
+      {!loading && amazonOrders.length === 0 && (
+        <p className="text-center text-gray-500">No orders available.</p>
+      )}
+
+      {!loading && amazonOrders.length > 0 && (
         <>
-          <Table className="w-full h-full table-fixed bg-blue-50 rounded-2xl p-4">
-            <TableHeader>
-              <TableRow>
-                <TableHead>AmazonOrderId</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>PaymentMethod</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead className="text-right">View</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedOrders.map((order) => (
-                <TableRow key={order.AmazonOrderId}>
-                  <TableCell className="font-medium">{order.AmazonOrderId}</TableCell>
-                  <TableCell>{order.OrderStatus}</TableCell>
-                  <TableCell>{order.PaymentMethod}</TableCell>
-                  <TableCell>₹{order.OrderTotal?.Amount}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/amazon-order-detail/${order.AmazonOrderId}`)}
-                    >
-                      View Item
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-blue-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                  >
+                    Order ID
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                  >
+                    Payment
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                  >
+                    Amount
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-right text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {paginatedOrders.map(order => (
+                  <tr
+                    key={order.AmazonOrderId}
+                    className="hover:bg-blue-50 transition-colors duration-150"
+                  >
+                    <td className="px-4 py-3 max-w-xs truncate font-medium text-gray-900">
+                      {order.AmazonOrderId}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{order.OrderStatus}</td>
+                    <td className="px-4 py-3 text-gray-700">{order.PaymentMethod}</td>
+                    <td className="px-4 py-3 text-gray-900 font-semibold">
+                      ₹{order.OrderTotal?.Amount}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => navigate(`/amazon-order-detail/${order.AmazonOrderId}`)}
+                        className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          {/* Pagination Controls */}
-          {amazonOrders?.length > itemsPerPage && (
-            <div className="flex justify-between items-center mt-4">
-              <Button
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 space-y-3 sm:space-y-0">
+              <button
                 onClick={handlePrev}
                 disabled={currentPage === 1}
-                className="mr-2"
+                className="px-5 py-2 bg-blue-100 text-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                Prev
-              </Button>
-              <p>
-                Page {currentPage} of {totalPages}
+                Previous
+              </button>
+
+              <p className="text-gray-600 font-medium">
+                Page <span className="font-semibold">{currentPage}</span> of{" "}
+                <span className="font-semibold">{totalPages}</span>
               </p>
-              <Button
+
+              <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className="ml-2"
+                className="px-5 py-2 bg-blue-100 text-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Next
-              </Button>
+              </button>
             </div>
           )}
         </>
