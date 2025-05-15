@@ -16,7 +16,7 @@ import ShopifyOrdersPage from './pages/ShopifyOrdersPage'
 import AmazonProducts from './components/product/AmazonProducts'
 import ShopifyProducts from './components/product/ShopifyProducts'
 import MenifestOrders from './pages/MenifestOrders'
-import IntransitOrders from './pages/intransitOrders'
+import IntransitOrders from "./pages/IntransitOrders";
 import OrderDetails from './pages/OrderDetails'
 import DispatchOrder from './pages/DispatchOrder'
 import DeliveredOrders from './pages/DeliveredOrders'
