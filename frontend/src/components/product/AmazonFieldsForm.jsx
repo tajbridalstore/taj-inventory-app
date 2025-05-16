@@ -128,13 +128,13 @@ const AmazonFieldsForm = ({
           Item Type Name
          <select
             {...register("item_type_name.0.value", {
-              required: "Clasp type is required",
+              required: "item type name is required",
             })}
             className="p-2 border border-yellow-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 max-h-40 overflow-y-auto"
           >
-            <option value="">Select Clasp Type</option>
+            <option value="">Select Item Type Name</option>
             <option value="Bangle Bracelets">Bangle Bracelets</option>
-            <option value="Bracelets">Screw</option>
+            <option value="Bracelets">Bracelets</option>
           </select>
         </label>
         <label className="flex flex-col">
