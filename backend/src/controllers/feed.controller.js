@@ -40,7 +40,7 @@ async function createFeed(accessToken, feedDocumentId) {
   const res = await axios.post(`${region}/feeds/2021-06-30/feeds`, body, {
     headers: getHeaders(accessToken),
   });
-
+  console.log("create feed", res);
   return res.data;
 }
 const createFeedProduct = async (req, res) => {
@@ -77,10 +77,15 @@ const createFeedProduct = async (req, res) => {
             value: "parent",
           },
         ],
-        
         metal_type: parentProduct.metal_type,
         material: parentProduct.material,
         metals: parentProduct.metals,
+        bullet_point: parentProduct.bullet_point,
+        generic_keyword: parentProduct.generic_keyword,
+        item_length: parentProduct.item_length,
+        item_weight: parentProduct.item_weight,
+        item_type_name: parentProduct.item_type_name,
+        clasp_type: parentProduct.clasp_type,
         main_product_image_locator: parentProduct.main_product_image_locator,
         other_product_image_locator_2:
           parentProduct.other_product_image_locator_2,
@@ -108,12 +113,12 @@ const createFeedProduct = async (req, res) => {
           metal_type: parentProduct.metal_type,
           material: parentProduct.material,
           metals: parentProduct.metals,
-          bullet_point:parentProduct.bullet_point,
-          generic_keyword:parentProduct.generic_keyword,
-          item_length:parentProduct.item_length,
-          item_weight:parentProduct.item_weight,
-          item_type_name:parentProduct.item_type_name,
-          clasp_type:parentProduct.clasp_type,
+          bullet_point: parentProduct.bullet_point,
+          generic_keyword: parentProduct.generic_keyword,
+          item_length: parentProduct.item_length,
+          item_weight: parentProduct.item_weight,
+          item_type_name: parentProduct.item_type_name,
+          clasp_type: parentProduct.clasp_type,
           ////////////////////////////////////////////////////////////////////
           purchasable_offer: variant.purchasable_offer,
           fulfillment_availability: variant.fulfillment_availability,
@@ -157,7 +162,6 @@ const createFeedProduct = async (req, res) => {
     const { feedDocumentId, url } = await createFeedDocument(accessToken);
     await uploadFeedToS3(url, feedData);
     const feedResponse = await createFeed(accessToken, feedDocumentId);
-    console.log(feedResponse);
     return res.json({
       success: true,
       message: "Feed uploaded and submitted successfully.",
@@ -170,9 +174,11 @@ const createFeedProduct = async (req, res) => {
 };
 
 async function getFeedStatus(accessToken, feedId) {
+  console.log("feedId", feedId);
   const res = await axios.get(`${region}/feeds/2021-06-30/feeds/${feedId}`, {
     headers: getHeaders(accessToken),
   });
+  console.log("getFeedStatus", res);
   return res.data;
 }
 
@@ -181,6 +187,7 @@ async function getFeedResultDocument(accessToken, resultFeedDocumentId) {
     `${region}/feeds/2021-06-30/documents/${resultFeedDocumentId}`,
     { headers: getHeaders(accessToken) }
   );
+
   return res.data; // contains a pre-signed URL
 }
 
@@ -214,7 +221,7 @@ const checkFeedStatus = async (req, res) => {
         resultFeedDocumentId
       );
       const resultData = await downloadResultFile(url);
-
+      console.log("resultData", resultData);
       return res.json({
         message: "Feed processed successfully.",
         status,
@@ -231,7 +238,6 @@ const checkFeedStatus = async (req, res) => {
     res.status(500).json({ error: err?.response?.data || err.message });
   }
 };
-
 
 const getAllListedProducts = async (req, res) => {
   try {
@@ -272,16 +278,13 @@ const getAllListedProducts = async (req, res) => {
   }
 };
 
-
-
-
 // const getAllAmazonProducts = async (req, res) => {
 //   try {
 //     const accessToken = await getAccessToken();
 //     const sellerId = process.env.SELLER_ID;
 //     const marketplaceId = "A21TJRUUN4KGV";
 //     const baseUrl = `https://sellingpartnerapi-eu.amazon.com/listings/2021-08-01/items/${sellerId}`;
-    
+
 //     let allProducts = [];
 //     let nextToken = null;
 //     let pageCount = 0; // optional: to limit max pages
@@ -307,7 +310,7 @@ const getAllListedProducts = async (req, res) => {
 //         });
 //       } catch (err) {
 //         console.error("Error during API call:", err.response?.data || err.message);
-        
+
 //         // If QuotaExceeded or any error happens, break the loop
 //         break;
 //       }
@@ -318,7 +321,7 @@ const getAllListedProducts = async (req, res) => {
 //       }
 
 //       console.log("Fetched batch:", response.data.items.length);
-      
+
 //       allProducts = allProducts.concat(response.data.items);
 //       nextToken = response.data.pagination?.nextToken || null;
 
@@ -348,7 +351,6 @@ const getAllListedProducts = async (req, res) => {
 //     });
 //   }
 // };
-
 
 // const  getAllListedProducts =async (req,res)=> {
 //   let nextToken = null;
@@ -389,7 +391,5 @@ const getAllListedProducts = async (req, res) => {
 //     data:allItems,
 //   })
 // }
-
-
 
 module.exports = { createFeedProduct, checkFeedStatus, getAllListedProducts };

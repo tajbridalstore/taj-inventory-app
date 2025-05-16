@@ -215,7 +215,8 @@ const CreateProduct = () => {
           method: "POST",
           body: parentFormData,
         });
-
+        
+console.log(uploadResponse)
         if (!uploadResponse.ok) {
           const errorResult = await uploadResponse.text();
           console.error("Parent image upload failed:", errorResult);

@@ -7,51 +7,15 @@ const AmazonFieldsForm = ({
   removeBullet,
 }) => {
   const metalTypeOptions = [
-    "Alloy Steel",
-    "Aluminium",
+  
     "Brass",
     "Bronze",
-    "Copper",
-    "Iron",
-    "Nickel",
-    "No Metal Type",
-    "Palladium",
-    "Pewter",
-    "Platinum",
-    "Rose Gold",
-    "Silver",
-    "Stainless Steel",
-    "Sterling Silver",
-    "Titanium",
-    "Tungsten",
-    "Tungsten Carbide",
-    "White Gold",
-    "Yellow Gold",
-    "Zinc",
   ];
 
   const metalsOptions = [
-    "Alloy Steel",
-    "Aluminium",
+   
     "Brass",
     "Bronze",
-    "Copper",
-    "Iron",
-    "Nickel",
-    "No Metal Type",
-    "Palladium",
-    "Pewter",
-    "Platinum",
-    "Rose Gold",
-    "Silver",
-    "Stainless Steel",
-    "Sterling Silver",
-    "Titanium",
-    "Tungsten",
-    "Tungsten Carbide",
-    "White Gold",
-    "Yellow Gold",
-    "Zinc",
   ];
   const materialOptions = ["Lac", "Metal"];
 
@@ -143,7 +107,7 @@ const AmazonFieldsForm = ({
         <label className="flex flex-col">
           Item Length
           <input
-            {...register("item_length.0.vale", {
+            {...register("item_length.0.value", {
               required: "Item Length required",
             })}
             className="p-2 border border-yellow-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -152,7 +116,7 @@ const AmazonFieldsForm = ({
         <label className="flex flex-col">
           Item Weight
           <input
-            {...register("item_weight.0.vale", {
+            {...register("item_weight.0.value", {
               required: "Item Weight required",
             })}
             className="p-2 border border-yellow-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -161,7 +125,7 @@ const AmazonFieldsForm = ({
         <label className="flex flex-col">
           Item Type Name
           <input
-            {...register("item_type_name.0.vale", {
+            {...register("item_type_name.0.value", {
               required: "Item Type Name required",
             })}
             className="p-2 border border-yellow-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"

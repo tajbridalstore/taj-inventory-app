@@ -11,10 +11,10 @@ const app = express();
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // For form-style data
 app.use(cors({
-    origin: "http://localhost:5173", // Frontend URL
+    origin: "https://api.inventorytaj.in", // Frontend URL
     credentials: true
 }));
-
+// http://localhost:5173
 // Serve static files from uploads
 const uploadPath = path.join(__dirname, '..', 'public', 'uploads');
 

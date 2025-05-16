@@ -12,10 +12,12 @@ import { Link } from "react-router";
 import { createFeedProduct, createShopifyProduct, getProducts } from "@/services/api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input"
+import { Spinner } from "@/components/Spinner";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
-
+const [loadingShopify, setLoadingShopify] = useState(null); 
+const [loadingAmazon, setLoadingAmazon] = useState(null); 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,30 +34,36 @@ const Products = () => {
     fetchData();
   }, []);
 
-  const handleShopify = async (sku) => {
-    try {
-      const response = await createShopifyProduct( sku );
-      console.log(response)
-      if (response?.success) {
-      alert("Product Created on Shopify")
-        toast.success("Product created on shopify")
-      }
-    } catch (error) {
-      console.log(error);
+const handleShopify = async (sku) => {
+  setLoadingShopify(sku);
+  try {
+    const response = await createShopifyProduct(sku);
+    if (response?.success) {
+      toast.success("Product created on Shopify");
+      alert("Product Created on Shopify");
     }
-  };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingShopify(null);
+  }
+};
 
-  const handleAmazon = async (sku) => {
-    try {
-      const response = await createFeedProduct( sku );
-      if (response?.success) {
-        alert("Product Created on Amazon")
-        toast.success("Product created on amazon")
-      }
-    } catch (error) {
-      console.log(error);
+const handleAmazon = async (sku) => {
+  setLoadingAmazon(sku);
+  try {
+    const response = await createFeedProduct(sku);
+    if (response?.success) {
+      toast.success("Product created on Amazon");
+      alert("Product Created on Amazon");
     }
-  };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoadingAmazon(null);
+  }
+};
+
   return (
     <div className="w-full h-full p-4">
       <div className="mb-4 w-full flex gap-2">
@@ -95,14 +103,27 @@ const Products = () => {
       <TableCell>{product.title}</TableCell>
       <TableCell>{product.sku}</TableCell>
       <TableCell>{product.status || "Draft"}</TableCell>
-      <TableCell className="space-y-2 text-right">
-        <div>
-          <Button className="cursor-pointer" onClick={() => handleShopify(product.sku)}>Add on Shopify</Button>
-        </div>
-        <div>
-          <Button className="cursor-pointer" onClick={() => handleAmazon(product.sku)}>Add on Amazon</Button>
-        </div>
-      </TableCell>
+<TableCell className="space-y-2 text-right">
+  <div>
+    <Button 
+      className="cursor-pointer w-full flex justify-center"
+      onClick={() => handleShopify(product.sku)}
+      disabled={loadingShopify === product.sku}
+    >
+      {loadingShopify === product.sku ? <Spinner /> : "Add on Shopify"}
+    </Button>
+  </div>
+  <div>
+    <Button 
+      className="cursor-pointer w-full flex justify-center"
+      onClick={() => handleAmazon(product.sku)}
+      disabled={loadingAmazon === product.sku}
+    >
+      {loadingAmazon === product.sku ? <Spinner /> : "Add on Amazon"}
+    </Button>
+  </div>
+</TableCell>
+
     </TableRow>
   ))}
 </TableBody>
