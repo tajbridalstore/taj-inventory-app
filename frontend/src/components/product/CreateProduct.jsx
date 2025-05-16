@@ -82,7 +82,13 @@ const CreateProduct = () => {
           marketplace_id: "A21TJRUUN4KGV",
         },
       ],
-      generic_keyword: [""],
+        generic_keyword: [
+      {
+        language_tag: "en_IN",
+        value:"",
+        marketplace_id: "A21TJRUUN4KGV"
+      }
+    ],
       main_product_image_locator: null, // Changed to null to hold File object
       other_product_image_locator_1: null,
       other_product_image_locator_2: null,

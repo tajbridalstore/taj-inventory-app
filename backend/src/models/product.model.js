@@ -59,7 +59,7 @@ const productSchema = new mongoose.Schema({
   title: { type: String, required:true },
   productImage:  { type: [mongoose.Schema.Types.Mixed], default: [], },
   tags: [{ type: String }],
-  generic_keyword: [{ type: String }],
+  generic_keyword:{ type: [mongoose.Schema.Types.Mixed], default: [] },
    bullet_point: { type: [mongoose.Schema.Types.Mixed], default: [] },
   body_html: [{ type: String }],
   sku: { type: String,required:true, unique:true  },

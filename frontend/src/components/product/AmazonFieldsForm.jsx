@@ -147,7 +147,7 @@ const AmazonFieldsForm = ({
         <label className="flex flex-col">
           Generic Keyword
           <input
-            {...register("generic_keyword")}
+            {...register("generic_keyword.0.value")}
             className="p-2 border border-yellow-400 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
         </label>
