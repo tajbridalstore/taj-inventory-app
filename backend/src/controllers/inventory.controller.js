@@ -2,8 +2,6 @@ const axios = require("axios");
 const getAccessToken = require("../utils/genarateToken");
 
 const getShopifyProductsInventory = async (req, res) => {
-  console.log("Fetching products and inventory...");
-
   try {
     const allInventoryData = [];
 
@@ -25,7 +23,7 @@ const getShopifyProductsInventory = async (req, res) => {
     }
     const locationIds = locations.map((location) => location.id);
 
-    console.log("✅ Locations fetched:", locationIds.length);
+
 
     // Step 2: Fetch all products (with pagination)
     let allProducts = [];
@@ -55,7 +53,7 @@ const getShopifyProductsInventory = async (req, res) => {
       }
     }
 
-    console.log("✅ Products fetched:", allProducts.length);
+
 
     // Step 3: Collect all variant inventory_item_ids
     const allVariantIds = [];
@@ -67,7 +65,7 @@ const getShopifyProductsInventory = async (req, res) => {
       }
     }
 
-    console.log("✅ Total variant inventory items collected:", allVariantIds.length);
+ 
 
     // Step 4: Fetch inventory levels in batches
     const variantInventoryMap = {}; // { inventory_item_id: inventory_level }
@@ -100,7 +98,7 @@ const getShopifyProductsInventory = async (req, res) => {
       await new Promise((resolve) => setTimeout(resolve, 200)); // 200ms
     }
 
-    console.log("✅ Inventory levels fetched.");
+
 
     // Step 5: Assemble final data
     for (const product of allProducts) {
@@ -123,7 +121,7 @@ const getShopifyProductsInventory = async (req, res) => {
       allInventoryData.push(productData);
     }
 
-    console.log("✅ All product inventory data ready.");
+
 
     return res.status(200).json({ success: true, allInventoryData });
 
@@ -193,7 +191,7 @@ const getAmazonInventory = async (req, res) => {
       }
     );
 
-    console.log("Report Created:", createReportResponse.data);
+  
     const reportId = createReportResponse.data.reportId;
 
     // Step 2: Check the status of the report
@@ -209,7 +207,7 @@ const getAmazonInventory = async (req, res) => {
     // If report is done, download the data
     if (reportStatus.reportProcessingStatus === 'DONE') {
       const reportData = await downloadReport(reportId, accessToken);
-      console.log("Report Data:", reportData);
+ 
       return res.json({ success: true, data: reportData });
     } else {
       console.error("Report failed:", reportStatus.reportProcessingStatus);

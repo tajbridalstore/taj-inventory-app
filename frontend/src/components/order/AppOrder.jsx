@@ -1,7 +1,7 @@
 import useGetOrders from "@/hooks/useGetOrders";
 import React from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router"; 
+import { useNavigate } from "react-router";
 import {
   Table,
   TableHeader,
@@ -9,26 +9,17 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table"; 
+} from "@/components/ui/table";
 import { Button } from "../ui/button";
 
 const AppOrder = () => {
   const navigate = useNavigate();
   useGetOrders();
-  const {
-    totalOrders,
-    loading,
-    error,
-
-
-  } = useSelector((state) => state.order);
-  console.log("totalOrders", totalOrders);
-
+  const { totalOrders, loading, error } = useSelector((state) => state.order);
 
   if (loading) {
     return <p>Loading orders...</p>;
   }
-
 
   return (
     <div>

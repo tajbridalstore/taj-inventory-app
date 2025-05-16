@@ -40,13 +40,13 @@ async function createFeed(accessToken, feedDocumentId) {
   const res = await axios.post(`${region}/feeds/2021-06-30/feeds`, body, {
     headers: getHeaders(accessToken),
   });
-  console.log("create feed", res);
+
   return res.data;
 }
 const createFeedProduct = async (req, res) => {
   try {
     const accessToken = await getAccessToken();
-    console.log(accessToken);
+
     const { sku } = req.body;
 
     // Get the parent product
@@ -174,11 +174,11 @@ const createFeedProduct = async (req, res) => {
 };
 
 async function getFeedStatus(accessToken, feedId) {
-  console.log("feedId", feedId);
+
   const res = await axios.get(`${region}/feeds/2021-06-30/feeds/${feedId}`, {
     headers: getHeaders(accessToken),
   });
-  console.log("getFeedStatus", res);
+ 
   return res.data;
 }
 
@@ -278,118 +278,6 @@ const getAllListedProducts = async (req, res) => {
   }
 };
 
-// const getAllAmazonProducts = async (req, res) => {
-//   try {
-//     const accessToken = await getAccessToken();
-//     const sellerId = process.env.SELLER_ID;
-//     const marketplaceId = "A21TJRUUN4KGV";
-//     const baseUrl = `https://sellingpartnerapi-eu.amazon.com/listings/2021-08-01/items/${sellerId}`;
 
-//     let allProducts = [];
-//     let nextToken = null;
-//     let pageCount = 0; // optional: to limit max pages
-
-//     do {
-//       const params = {
-//         marketplaceIds: marketplaceId,
-//         includedData: "summaries,fulfillmentAvailability",
-//       };
-
-//       if (nextToken) {
-//         params.nextToken = nextToken;
-//       }
-
-//       let response;
-//       try {
-//         response = await axios.get(baseUrl, {
-//           headers: {
-//             "x-amz-access-token": accessToken,
-//             "Content-Type": "application/json",
-//           },
-//           params,
-//         });
-//       } catch (err) {
-//         console.error("Error during API call:", err.response?.data || err.message);
-
-//         // If QuotaExceeded or any error happens, break the loop
-//         break;
-//       }
-
-//       if (!response.data.items || response.data.items.length === 0) {
-//         console.log("No more items found, stopping.");
-//         break;
-//       }
-
-//       console.log("Fetched batch:", response.data.items.length);
-
-//       allProducts = allProducts.concat(response.data.items);
-//       nextToken = response.data.pagination?.nextToken || null;
-
-//       pageCount++;
-//       if (pageCount > 100) {  // safety limit to avoid infinite loop
-//         console.log("Page limit exceeded, breaking loop.");
-//         break;
-//       }
-
-//     } while (nextToken);
-
-//     console.log("Total products fetched:", allProducts.length);
-
-//     res.status(200).json({
-//       success: true,
-//       products: allProducts,
-//     });
-
-//   } catch (error) {
-//     console.error(
-//       "Error fetching products:",
-//       error.response?.data || error.message
-//     );
-//     res.status(500).json({
-//       success: false,
-//       message: error.response?.data?.message || error.message,
-//     });
-//   }
-// };
-
-// const  getAllListedProducts =async (req,res)=> {
-//   let nextToken = null;
-//   let allItems = [];
-//   const marketplaceId =  'A21TJRUUN4KGV';
-//  const accessToken = getAccessToken();
-//   do {
-//     // Build request URL
-//     let url = `https://sellingpartnerapi-eu.amazon.in/listings/2021-08-01/items/${process.env.sellerId}`;
-//     const params = new URLSearchParams({ marketplaceIds: marketplaceId });
-
-//     if (nextToken) {
-//       params.append('nextToken', nextToken);
-//     }
-
-//     url += `?${params.toString()}`;
-
-//     // Perform the API request
-//     const response = await axios.get(url, {
-//       headers: {
-//         'x-amz-access-token': accessToken,
-//       }
-//     });
-
-//     const items = response.data.items || [];
-//     allItems.push(...items);
-
-//     console.log(`Fetched ${items.length} items`);
-
-//     // Update nextToken for next loop iteration
-//     nextToken = response.data.nextToken || null;
-
-//   } while (nextToken);
-
-//   console.log(`Total products fetched: ${allItems.length}`);
-//   return res.status(200).json({
-//     success:true,
-//     data:allItems,
-//   })
-// }
 
 module.exports = { createFeedProduct, checkFeedStatus, getAllListedProducts };

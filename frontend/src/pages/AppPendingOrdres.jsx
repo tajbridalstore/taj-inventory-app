@@ -32,7 +32,7 @@ const AppPendingOrdres = () => {
   const dispatch = useDispatch();
   const { pendingOrders = [] } = useSelector((state) => state.order);
   const [menifestItems, setMenifestItems] = useState([]);
-  console.log(pendingOrders);
+
   // Only include orders that have at least one pending item
   const filteredPendingOrders = pendingOrders.filter((order) =>
     order.orderItems?.some((item) => item.status === "pending")

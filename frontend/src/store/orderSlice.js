@@ -132,13 +132,13 @@ removeDeliveredItem(state, action) {
         state.cancelOrders = [...state.cancelOrders, payload];
       }
     },
-     removePendingOrder(state, action) {
-      const orderIdToRemove = action.payload;
-      state.pendingOrders = state.pendingOrders.filter(
-        (order) => order._id !== orderIdToRemove
-      );
-    },
-
+    
+    removePendingShopifyOrder(state, action) {
+     const shopifyOrderIdToRemove = action.payload;
+     state.shopifyPendingOrders = state.shopifyPendingOrders.filter(
+       (order) => order._id !== shopifyOrderIdToRemove
+     );
+   },
     fetchReplacedItems(state, action) {
       const payload = action.payload;
       if (Array.isArray(payload)) {
@@ -181,6 +181,7 @@ export const {
   removePendingOrder,
   fetchReplacedItems,
   removeReplacedItem,
-  removeDeliveredItem
+  removeDeliveredItem,
+  removePendingShopifyOrder
 } = orderSlice.actions;
 export default orderSlice.reducer;

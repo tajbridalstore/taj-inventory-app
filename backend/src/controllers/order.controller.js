@@ -363,7 +363,7 @@ const getAllShopifyOrders = async (req, res) => {
   const cache = new NodeCache({ stdTTL: 3600 });
   try {
     const shopifyOrders = "shopify_orders";
-console.log("first")
+
     // 🔍 1. Check cache
     const cachedOrders = cache.get(shopifyOrders);
 

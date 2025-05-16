@@ -10,12 +10,14 @@ const AmazonFieldsForm = ({
   
     "Brass",
     "Bronze",
+    "No Metal Type"
   ];
 
   const metalsOptions = [
    
     "Brass",
     "Bronze",
+    "No Metal Type"
   ];
   const materialOptions = ["Lac", "Metal"];
 
@@ -141,7 +143,7 @@ const AmazonFieldsForm = ({
           >
             <option value="">Select Clasp Type</option>
             <option value="Slide">Slide</option>
-            <option value="Scroll">Scroll</option>
+            <option value="Screw">Screw</option>
           </select>
         </label>
         <label className="flex flex-col">

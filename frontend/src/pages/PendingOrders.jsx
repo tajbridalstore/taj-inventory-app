@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import useGetShopifyOrders from '@/hooks/useGetShopifyOrders';
 import AppPendingOrdres from './AppPendingOrdres';
+import ShopifyPendingOrders from '@/components/order/ShopifyPendingOrdres';
 
 const PendingOrders = () => {
   const [shopifyPage, setShopifyPage] = useState(1);
@@ -33,7 +34,7 @@ const PendingOrders = () => {
     (shopifyPage - 1) * itemsPerPage,
     shopifyPage * itemsPerPage
   );
-
+console.log(shopifyPendingOrders)
   return (
     <div className="space-y-6">
 
@@ -80,11 +81,11 @@ const PendingOrders = () => {
       </div>
 
       {/* Shopify Orders Section */}
-      <div className='border-1 border-gray-100 p-4 rounded-xl'>
+      {/* <div className='border-1 border-gray-100 p-4 rounded-xl'>
         <h2 className="text-xl font-semibold">Shopify Pending Orders</h2>
-        {hasShopifyPending ? (
+        {hasShopifyPending ? ( */}
           <>
-            <Table className="w-full">
+            {/* <Table className="w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead>Shopify Order ID</TableHead>
@@ -93,8 +94,8 @@ const PendingOrders = () => {
                   <TableHead>Amount</TableHead>
                   <TableHead className="text-right">View</TableHead>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
+              </TableHeader> */}
+              {/* <TableBody>
                 {paginatedShopifyOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.name}</TableCell>
@@ -113,10 +114,10 @@ const PendingOrders = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </Table> */}
 
             {/* Pagination Controls */}
-            <div className="flex justify-end items-center gap-4 mt-4">
+            {/* <div className="flex justify-end items-center gap-4 mt-4">
               <Button
                 disabled={shopifyPage === 1}
                 onClick={() => setShopifyPage(shopifyPage - 1)}
@@ -130,13 +131,13 @@ const PendingOrders = () => {
               >
                 Next
               </Button>
-            </div>
+            </div> */}
           </>
-        ) : (
-          <p className="text-gray-500 mt-2">No Pending Shopify Orders</p>
-        )}
-      </div>
-
+      {/* //   ) : (
+      //     <p className="text-gray-500 mt-2">No Pending Shopify Orders</p>
+      //   )} */}
+      {/* // </div> */}
+<ShopifyPendingOrders />
     </div>
   );
 };
