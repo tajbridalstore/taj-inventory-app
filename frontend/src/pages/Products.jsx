@@ -94,7 +94,7 @@ const Products = () => {
                   <TableCell>
                     {product.productImage && product.productImage[0] && (
                       <img
-                        src={`http://localhost:8000${product.productImage[0]}`}
+                        src={`https://api.inventorytaj.in${product.productImage[0]}`}
                         alt={product.title}
                         className="w-16 h-16 object-cover rounded"
                         onError={(e) => {
