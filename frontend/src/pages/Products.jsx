@@ -67,7 +67,7 @@ const Products = () => {
       setLoadingAmazon(null);
     }
   };
-console.log(products)
+  console.log(products);
   return (
     <div className="w-full h-full p-4">
       <div className="mb-4 w-full flex gap-2">
@@ -94,7 +94,7 @@ console.log(products)
                   <TableCell>
                     {product.productImage && product.productImage[0] && (
                       <img
-                        src={`https://api.inventorytaj.in/uploads/A5-Copy.jpg`}
+                        src={`https://api.inventorytaj.in${product.productImage[0]}`}
                         alt={product.title}
                         className="w-16 h-16 object-cover rounded"
                         onError={(e) => {
