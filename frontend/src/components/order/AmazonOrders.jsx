@@ -1,7 +1,9 @@
 import useGetAmazonOrders from "@/hooks/useGetAmazonOrders";
 import { useState } from "react";
+
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { Button } from "../ui/button";
 
 const AmazonOrders = () => {
   useGetAmazonOrders();
@@ -66,31 +68,31 @@ const AmazonOrders = () => {
                 <tr>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xl font-semibold text-blue-800 uppercase tracking-wider"
                   >
                     Order ID
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xl font-semibold text-blue-800 uppercase tracking-wider"
                   >
                     Status
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xl font-semibold text-blue-800 uppercase tracking-wider"
                   >
                     Payment
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xl font-semibold text-blue-800 uppercase tracking-wider"
                   >
                     Amount
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-right text-xs font-semibold text-blue-800 uppercase tracking-wider"
+                    className="px-4 py-3 text-right text-xl font-semibold text-blue-800 uppercase tracking-wider"
                   >
                     Action
                   </th>
@@ -102,21 +104,22 @@ const AmazonOrders = () => {
                     key={order.AmazonOrderId}
                     className="hover:bg-blue-50 transition-colors duration-150"
                   >
-                    <td className="px-4 py-3 max-w-xs truncate font-medium text-gray-900">
+                    <td className="px-4 py-3 max-w-xs truncate font-medium text-gray-900 text-xl">
                       {order.AmazonOrderId}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{order.OrderStatus}</td>
-                    <td className="px-4 py-3 text-gray-700">{order.PaymentMethod}</td>
-                    <td className="px-4 py-3 text-gray-900 font-semibold">
+                    <td className="px-4 py-3 text-gray-700 text-xl">{order.OrderStatus}</td>
+                    <td className="px-4 py-3 text-gray-700 text-xl">{order.PaymentMethod}</td>
+                    <td className="px-4 py-3 text-gray-900 font-semibold text-xl">
                       ₹{order.OrderTotal?.Amount}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
+                    <td className="px-4 py-3 text-right text-xl">
+                      <Button
+                         variant="outline"
                         onClick={() => navigate(`/amazon-order-detail/${order.AmazonOrderId}`)}
-                        className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                         className="text-blue-700 hover:text-blue-900 border-blue-700 hover:border-blue-900"
                       >
                         View Details
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}

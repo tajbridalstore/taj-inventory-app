@@ -94,18 +94,13 @@ const Products = () => {
                   <TableCell>
                     {product.productImage && product.productImage[0] && (
                       <img
-                        src={
-                          product.productImage && product.productImage[0]
-                            ? product.productImage[0].includes("http")
-                              ? product.productImage[0].replace(
-                                  "http://localhost:8000",
-                                  "https://api.inventorytaj.in"
-                                )
-                              : `https://api.inventorytaj.in${product.productImage[0]}`
-                            : "/fallback-image.png"
-                        }
+                        src={`https://api.inventorytaj.in${product.productImage[0]}`}
                         alt={product.title}
                         className="w-16 h-16 object-cover rounded"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/fallback-image.png";
+                        }}
                       />
                     )}
                   </TableCell>

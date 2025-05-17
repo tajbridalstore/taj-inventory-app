@@ -60,25 +60,25 @@ const ShopifyOrders = () => {
                 <Table className="min-w-[600px] w-full table-fixed bg-blue-50 rounded-xl">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-sm sm:text-base">
+                      <TableHead className="text-left text-xl px-4 py-3 text-blue-900 font-semibold sm:text-base">
                         Order ID
                       </TableHead>
-                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-sm sm:text-base">
+                      <TableHead className="text-left text-xl px-4 py-3 text-blue-900 font-semibold sm:text-base">
                         Status
                       </TableHead>
-                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-sm sm:text-base">
+                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-xl sm:text-base">
                         Payment Method
                       </TableHead>
-                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-sm sm:text-base">
+                      <TableHead className="text-left px-4 py-3 text-blue-900 font-semibold text-xl sm:text-base">
                         Total Amount
                       </TableHead>
-                      <TableHead className="text-right px-4 py-3 text-blue-900 font-semibold text-sm sm:text-base">
+                      <TableHead className="text-right px-4 py-3 text-blue-900 font-semibold text-xl sm:text-base">
                         View
                       </TableHead>
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody>
+                  <TableBody className="text-xl">
                     {paginatedOrders.map((order) => (
                       <TableRow
                         key={order.id}

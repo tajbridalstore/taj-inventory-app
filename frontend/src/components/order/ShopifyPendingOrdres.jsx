@@ -212,7 +212,7 @@ const ShopifyPendingOrders = () => {
                     size="sm"
                     variant="destructive"
                     onClick={() => handleCancelShopifyOrder(order.id)} // Use order.id
-                    className="mt-2" // Add some margin to separate from other actions
+                    className="mt-2" 
                   >
                     Cancel Order
                   </Button>

@@ -27,7 +27,7 @@ const AppOrder = () => {
       {totalOrders && totalOrders.length > 0 ? (
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="text-xl">
               <TableHead>Order ID</TableHead>
               <TableHead>Order Date</TableHead>
               <TableHead>Total Items</TableHead>
@@ -36,7 +36,7 @@ const AppOrder = () => {
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="text-xl">
             {totalOrders.map((order) => (
               <TableRow key={order._id}>
                 <TableCell>{order?.orderId}</TableCell>
