@@ -20,7 +20,7 @@ const AppOrder = () => {
   if (loading) {
     return <p>Loading orders...</p>;
   }
-
+console.log(totalOrders)
   return (
     <div>
       <h1>Orders</h1>

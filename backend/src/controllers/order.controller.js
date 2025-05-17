@@ -185,35 +185,43 @@ const createAppOrder = async (req, res) => {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const getAmazonOrderItem = async (req, res) => {
   try {
     const { orderId } = req.params;
     const accessToken = await getAccessToken();
 
-    const apiUrl = `${process.env.ORDER_API}/${orderId}/orderItems`;
-
-    const response = await axios.get(apiUrl, {
+    // 1. Get Order Details (for Shipping Address)
+    const orderApiUrl = `https://sellingpartnerapi-eu.amazon.com/orders/v0/orders/${orderId}`;
+    const orderResponse = await axios.get(orderApiUrl, {
       headers: {
         "Content-Type": "application/json",
         "x-amz-access-token": accessToken,
       },
     });
+    const orderData = orderResponse.data.payload;
 
-    const orderItems = response.data.payload.OrderItems;
+    // 2. Get Order Items (as you were already doing)
+    const orderItemsApiUrl = `${process.env.ORDER_API}/${orderId}/orderItems`;  //  use ORDER_API env variable
+    const orderItemsResponse = await axios.get(orderItemsApiUrl, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-amz-access-token": accessToken,
+      },
+    });
+    const orderItems = orderItemsResponse.data.payload.OrderItems;
 
-    // Fetch images for all ASINs in parallel
+    // 3. Fetch images for all ASINs in parallel
     const itemsWithImages = await Promise.all(
       orderItems.map(async (item) => {
         try {
           const catalogApiUrl = `https://sellingpartnerapi-eu.amazon.com/catalog/2022-04-01/items/${item.ASIN}?marketplaceIds=A21TJRUUN4KGV&includedData=images`;
-
           const catalogResponse = await axios.get(catalogApiUrl, {
             headers: {
               "Content-Type": "application/json",
               "x-amz-access-token": accessToken,
             },
           });
-
           const image = catalogResponse.data.images?.[0]?.images?.[0]?.link || null;
           return { ...item, image };
         } catch (err) {
@@ -223,21 +231,24 @@ const getAmazonOrderItem = async (req, res) => {
       })
     );
 
-    const dataWithImages = {
-      AmazonOrderId: response.data.payload.AmazonOrderId,
+    // Combine the order data and item data
+    const combinedData = {
+      AmazonOrderId: orderData.AmazonOrderId,
       OrderItems: itemsWithImages,
+      ShippingAddress: orderData.ShippingAddress, // Include the shipping address
+      PurchaseDate: orderData.PurchaseDate,  // Include PurchaseDate
+      OrderStatus: orderData.OrderStatus,    // Include OrderStatus
     };
-
+console.log(combinedData)
     res.status(200).json({
-      message: "Order item get successfully",
+      message: "Order items and shipping address retrieved successfully",
       success: true,
-      data: dataWithImages,
+      data: combinedData,
     });
-
   } catch (error) {
-    console.error("Error in getting order:", error);
+    console.error("Error in getting order items and shipping address:", error);
     res.status(500).json({
-      message: "Error get order",
+      message: "Error getting order details",
       success: false,
       error: error.response ? error.response.data : error.message,
     });
@@ -406,7 +417,7 @@ const getShopifyOrderItem = async (req, res) => {
     const { orderId } = req.params;
 
     // 1. Fetch the order details
-    const orderApiUrl = `${SHOPIFY_ORDER_API}/${orderId}.json?fields=id,line_items,name,total_price`;
+    const orderApiUrl = `${SHOPIFY_ORDER_API}/${orderId}.json?fields=id,line_items,name,total_price,shipping_address`;
     const orderResponse = await axios.get(orderApiUrl, {
       headers: {
         "Content-Type": "application/json",

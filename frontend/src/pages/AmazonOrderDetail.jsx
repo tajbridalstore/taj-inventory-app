@@ -1,94 +1,115 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { getSingleAmazonOrderItem } from "@/services/api"; // 🔥 We'll create this API function too
+import { getSingleAmazonOrderItem } from "@/services/api";
 
 const AnazonOrderDetail = () => {
   const { orderId } = useParams();
-
-  const [items, setItems] = useState([]);
-  const [loadingItems, setLoadingItems] = useState(false);
-  const [errorItems, setErrorItems] = useState(null);
+  const [order, setOrder] = useState(null); // Use a single 'order' state
+  const [loading, setLoading] = useState(false); // Use 'loading'
+  const [error, setError] = useState(null);   // Use 'error'
 
   useEffect(() => {
-    const fetchOrderItems = async () => {
-      setLoadingItems(true);
-      setErrorItems(null);
+    const fetchOrderDetails = async () => {
+      setLoading(true);
+      setError(null);
 
       try {
         const response = await getSingleAmazonOrderItem(orderId);
-        console.log("Fetched order items:", response);
+        console.log("Fetched order details:", response);
 
         if (response?.success) {
-          setItems(response?.data?.OrderItems || []);
+          setOrder(response.data); // Store the entire data object
         } else {
-          setErrorItems("Failed to fetch order items");
+          setError("Failed to fetch order details");
         }
       } catch (error) {
-        console.error("Error fetching order items:", error);
-        setErrorItems("Error fetching order items");
+        console.error("Error fetching order details:", error);
+        setError("Error fetching order details");
       } finally {
-        setLoadingItems(false);
+        setLoading(false);
       }
     };
 
     if (orderId) {
-      fetchOrderItems();
+      fetchOrderDetails();
     }
   }, [orderId]);
 
+  if (loading) {
+    return <div className="p-6 text-center">Loading order details...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-center text-red-500">{error}</div>;
+  }
+
+  if (!order) {
+    return <div className="p-6 text-center">Order details not found.</div>;
+  }
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">
-        Order Items for Order ID: {orderId}
-      </h2>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <div className="mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="bg-indigo-500 text-white py-4 px-6">
+          <h2 className="text-2xl font-semibold">Order Details for Order ID: {orderId}</h2>
+        </div>
 
-      {loadingItems && <p>Loading...</p>}
-      {errorItems && <p className="text-red-500">{errorItems}</p>}
+        <div className="p-6">
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold mb-2">Order Information</h3>
+            <p>
+              <strong>Amazon Order ID:</strong> {order.AmazonOrderId}
+            </p>
+            <p>
+              <strong>Purchase Date:</strong> {order.PurchaseDate}
+            </p>
+            <p>
+              <strong>Order Status:</strong> {order.OrderStatus}
+            </p>
+          </div>
 
-      {!loadingItems && items.length > 0 && (
-        <Table className="w-full h-full table-fixed bg-blue-50 rounded-2xl p-4">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Image</TableHead>
-              <TableHead>ASIN</TableHead>
-              <TableHead>Seller SKU</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell>
+          {order.ShippingAddress && (
+            <div className="mb-6">
+              <h3 className="text-xl font-semibold mb-2">Shipping Address</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><strong>City:</strong> <p className="text-gray-700">{order.ShippingAddress.City}</p></div>
+                <div><strong>Country Code:</strong> <p className="text-gray-700">{order.ShippingAddress.CountryCode}</p></div>
+                <div><strong>Postal Code:</strong> <p className="text-gray-700">{order.ShippingAddress.PostalCode}</p></div>
+                <div><strong>State/Region:</strong> <p className="text-gray-700">{order.ShippingAddress.StateOrRegion}</p></div>
+              </div>
+            </div>
+          )}
+
+          <h3 className="text-xl font-semibold mb-4">Order Items</h3>
+          {order.OrderItems && order.OrderItems.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
+              {order.OrderItems.map((item, index) => (
+                <div key={index} className="bg-gray-50 rounded-md border border-gray-200 p-4 mb-4">
                   {item.image && (
                     <img
                       src={item.image}
-                      alt={item.Title || "Product image"}
-                      className="w-16 h-16 object-cover rounded"
+                      alt={item.Title || "Product Image"}
+                      className="w-full h-32 object-cover rounded-md mb-2"
                     />
                   )}
-                </TableCell>
-                <TableCell>{item.ASIN}</TableCell>
-                <TableCell>{item.SellerSKU}</TableCell>
-                <TableCell>{item.QuantityOrdered}</TableCell>
-                <TableCell>₹{item.ItemPrice?.Amount ?? "N/A"}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-
-      {!loadingItems && items.length === 0 && (
-        <p>No order items found for this order.</p>
-      )}
+                  <p className="font-semibold text-lg text-indigo-600">{item.Title || 'N/A'}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                    <div><strong>ASIN:</strong> <p className="text-gray-700">{item.ASIN || 'N/A'}</p></div>
+                    <div><strong>SKU:</strong> <p className="text-gray-700">{item.SellerSKU || 'N/A'}</p></div>
+                    <div><strong>Quantity:</strong> <p className="text-gray-700">{item.QuantityOrdered || 'N/A'}</p></div>
+                  </div>
+                  <p className="mt-2"><strong>Unit Price:</strong> ₹{item.ItemPrice?.Amount || 0}</p>
+                  <p className="font-bold text-green-600 mt-2">
+                    Total: ₹{(parseFloat(item.ItemPrice?.Amount || 0) * item.QuantityOrdered).toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No items found in this order.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

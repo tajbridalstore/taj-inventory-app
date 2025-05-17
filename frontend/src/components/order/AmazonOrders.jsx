@@ -22,7 +22,7 @@ const AmazonOrders = () => {
 
   const handlePrev = () => setCurrentPage(prev => Math.max(prev - 1, 1));
   const handleNext = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
-
+console.log(amazonOrders)
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Amazon Orders</h2>

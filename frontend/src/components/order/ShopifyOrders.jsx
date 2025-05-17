@@ -39,6 +39,7 @@ const ShopifyOrders = () => {
     if (currentPage > 1) setCurrentPage((prevPage) => prevPage - 1);
   };
 
+  console.log(shopifyTotalOrders)
   return (
     <div className="w-full min-h-[300px] p-4 bg-white rounded-xl shadow-md max-w-7xl mx-auto">
       {shopifyLoading && (
